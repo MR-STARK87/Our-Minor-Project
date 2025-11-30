@@ -1,0 +1,885 @@
+<!-- 3-Dot Menu Icon Button -->
+<button
+    class="menu-icon"
+    onclick="toggleMenuDropdown()"
+    aria-label="Menu"
+    id="menuIcon"
+>
+    <i class="fas fa-ellipsis-v"></i>
+</button>
+
+<!-- Menu Dropdown -->
+<div id="menuDropdown" class="menu-dropdown" style="display: none;">
+    <div class="menu-dropdown-content">
+        <!-- Profile Option -->
+        <div class="menu-item" onclick="openProfile()">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </div>
+
+        <!-- Memory Option -->
+        <div class="menu-item" onclick="openMemory()">
+            <i class="fas fa-brain"></i>
+            <span>Memory</span>
+        </div>
+
+        <!-- Theme Settings Option -->
+        <div class="menu-item" onclick="toggleThemeSubmenu()">
+            <i class="fas fa-palette"></i>
+            <span>Theme</span>
+            <i class="fas fa-chevron-right menu-item-arrow"></i>
+        </div>
+
+        <!-- Theme Submenu -->
+        <div id="themeSubmenu" class="theme-submenu" style="display: none;">
+            <div class="menu-item theme-option" onclick="setTheme('light')">
+                <i class="fas fa-sun"></i>
+                <span>Light</span>
+                <i class="fas fa-check theme-check" id="lightCheck" style="display: none;"></i>
+            </div>
+            <div class="menu-item theme-option" onclick="setTheme('dark')">
+                <i class="fas fa-moon"></i>
+                <span>Dark</span>
+                <i class="fas fa-check theme-check" id="darkCheck" style="display: none;"></i>
+            </div>
+        </div>
+
+        <!-- Logout Option -->
+        <div class="menu-item menu-item-danger" onclick="handleLogout()">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+        </div>
+
+        <!-- Version Info -->
+        <div class="menu-version">
+            <span>Version 1.0.0</span>
+        </div>
+    </div>
+</div>
+
+<!-- Profile Modal -->
+<div id="profileModal" class="profile-modal" style="display: none;">
+    <div class="profile-modal-content">
+        <div class="profile-modal-header">
+            <h2>Profile</h2>
+            <button onclick="closeProfile()" class="profile-close-btn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="profile-modal-body">
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="profile-info">
+                    <h3 id="profileName" class="profile-name">Loading...</h3>
+                    <p id="profileUsername" class="profile-username">@username</p>
+                </div>
+            </div>
+            <div class="profile-details">
+                <div class="profile-detail-item">
+                    <i class="fas fa-envelope"></i>
+                    <span id="profileEmail">email@example.com</span>
+                </div>
+                <div class="profile-detail-item">
+                    <i class="fas fa-calendar"></i>
+                    <span id="profileJoined">Joined Recently</span>
+                </div>
+                <div class="profile-detail-item" id="profileVerified" style="display: none;">
+                    <i class="fas fa-check-circle" style="color: #10b981;"></i>
+                    <span>Email Verified</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Memory Modal -->
+<div id="memoryModal" class="profile-modal" style="display: none;">
+    <div class="profile-modal-content">
+        <div class="profile-modal-header">
+            <h2>Memory</h2>
+            <button onclick="closeMemory()" class="profile-close-btn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="profile-modal-body">
+            <div class="memory-content">
+                <div class="memory-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <div class="memory-description">
+                    <p>What Retro remembers about you:</p>
+                </div>
+                <div class="memory-text" id="memoryText">
+                    <p>Loading...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Menu Icon */
+    .menu-icon {
+        position: fixed;
+        top: 1.5rem;
+        right: 2rem;
+        z-index: 1001;
+        background: var(--bg-secondary);
+        border: 2px solid var(--border-color);
+        border-radius: 50%;
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-subtle);
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+    }
+
+    /* Glassmorphism effect when ambient mode is active on DEN page - LIGHT MODE ONLY */
+    body:not([data-theme="dark"]) .horizontal-container.show-den body.ambient-active .menu-icon,
+    body:not([data-theme="dark"]) body.ambient-active .horizontal-container.show-den .menu-icon {
+        background: rgba(255, 255, 255, 0.1) !important;
+        backdrop-filter: blur(16px) saturate(180%);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    .menu-icon:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 16px var(--shadow-lg);
+    }
+
+    .menu-icon i {
+        font-size: 1.25rem;
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+        pointer-events: none;
+    }
+
+    /* Menu Dropdown */
+    .menu-dropdown {
+        position: fixed;
+        top: 5rem;
+        right: 2rem;
+        z-index: 1002;
+        background: var(--bg-secondary);
+        border: 2px solid var(--border-color);
+        border-radius: 1rem;
+        min-width: 220px;
+        box-shadow: 0 20px 40px var(--shadow-lg);
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: all 0.3s ease;
+        pointer-events: none;
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+    }
+
+    /* Glassmorphism effect when ambient mode is active on DEN page - LIGHT MODE ONLY */
+    body:not([data-theme="dark"]) .horizontal-container.show-den body.ambient-active .menu-dropdown,
+    body:not([data-theme="dark"]) body.ambient-active .horizontal-container.show-den .menu-dropdown {
+        background: rgba(255, 255, 255, 0.1) !important;
+        backdrop-filter: blur(16px) saturate(180%);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Adjust text colors for glassmorphism visibility - LIGHT MODE ONLY */
+    body:not([data-theme="dark"]) body.ambient-active .horizontal-container.show-den .menu-icon i {
+        color: rgba(255, 255, 255, 0.95);
+    }
+
+    body:not([data-theme="dark"]) body.ambient-active .horizontal-container.show-den .menu-item,
+    body:not([data-theme="dark"]) body.ambient-active .horizontal-container.show-den .menu-item span {
+        color: rgba(255, 255, 255, 0.95) !important;
+    }
+
+    .menu-dropdown.active {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: all;
+    }
+
+    .menu-dropdown-content {
+        padding: 0.5rem;
+    }
+
+    .menu-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: var(--text-primary);
+        font-size: 0.9375rem;
+        position: relative;
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+    }
+
+    .menu-item:hover {
+        background: var(--bg-hover, rgba(0, 0, 0, 0.05));
+    }
+
+    [data-theme="dark"] .menu-item:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .menu-item i:first-child {
+        font-size: 1rem;
+        color: var(--text-secondary);
+        width: 1.25rem;
+        text-align: center;
+        pointer-events: none;
+    }
+
+    .menu-item span {
+        flex: 1;
+    }
+
+    .menu-item-arrow {
+        font-size: 0.75rem !important;
+        color: var(--text-secondary) !important;
+        margin-left: auto;
+    }
+
+    .menu-item-danger {
+        color: #ef4444;
+    }
+
+    .menu-item-danger i {
+        color: #ef4444 !important;
+    }
+
+    .menu-item-danger:hover {
+        background: rgba(239, 68, 68, 0.1);
+    }
+
+    /* Theme Submenu */
+    .theme-submenu {
+        margin-left: 1rem;
+        padding-left: 1rem;
+        border-left: 2px solid var(--border-color);
+        margin-top: 0.25rem;
+        margin-bottom: 0.25rem;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+    }
+
+    .theme-submenu.active {
+        max-height: 200px;
+    }
+
+    .theme-option {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+    }
+
+    .theme-check {
+        color: #10b981 !important;
+        font-size: 0.875rem !important;
+    }
+
+    /* Menu Version */
+    .menu-version {
+        padding: 0.75rem 1rem;
+        text-align: center;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        border-top: 1px solid var(--border-color);
+        margin-top: 0.5rem;
+    }
+
+    /* Profile Modal */
+    .profile-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(8px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .profile-modal.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .profile-modal-content {
+        background: var(--bg-secondary);
+        border-radius: 1.5rem;
+        width: 90%;
+        max-width: 450px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        transform: scale(0.9) translateY(20px);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+    [data-theme="dark"] .profile-modal-content {
+        background: #0f0f0e;
+    }
+
+    .profile-modal.active .profile-modal-content {
+        transform: scale(1) translateY(0);
+    }
+
+    .profile-modal-header {
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .profile-modal-header h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        color: var(--text-primary);
+        font-family: "Space Grotesk", sans-serif;
+    }
+
+    .profile-close-btn {
+        background: transparent;
+        border: none;
+        font-size: 1.25rem;
+        color: var(--text-secondary);
+        cursor: pointer;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+    }
+
+    .profile-close-btn:hover {
+        background: var(--bg-hover, rgba(0, 0, 0, 0.05));
+        color: var(--text-primary);
+    }
+
+    [data-theme="dark"] .profile-close-btn:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .profile-modal-body {
+        padding: 2rem;
+    }
+
+    .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .profile-avatar {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: #c2c0b6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    [data-theme="dark"] .profile-avatar {
+        background: #c2c0b6;
+    }
+
+    .profile-avatar i {
+        font-size: 1.75rem;
+        color: #141413;
+    }
+
+    [data-theme="dark"] .profile-avatar i {
+        color: #141413;
+    }
+
+    .profile-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .profile-name {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+        font-family: "Space Grotesk", sans-serif;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .profile-username {
+        font-size: 0.9375rem;
+        color: var(--text-secondary);
+        margin: 0.25rem 0 0 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .profile-details {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .profile-detail-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.9375rem;
+        color: var(--text-secondary);
+    }
+
+    .profile-detail-item i {
+        font-size: 1.125rem;
+        color: var(--text-secondary);
+        width: 1.5rem;
+        text-align: center;
+    }
+
+    .profile-detail-item span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Memory Modal Styles */
+    .memory-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .memory-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .memory-icon i {
+        font-size: 2.5rem;
+        color: white;
+    }
+
+    .memory-description {
+        margin-bottom: 1.5rem;
+    }
+
+    .memory-description p {
+        font-size: 1rem;
+        color: var(--text-secondary);
+        margin: 0;
+        font-weight: 500;
+    }
+
+    .memory-text {
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+        width: 100%;
+        min-height: 100px;
+    }
+
+    [data-theme="dark"] .memory-text {
+        background: rgba(255, 255, 255, 0.03);
+    }
+
+    .memory-text p {
+        font-size: 1rem;
+        color: var(--text-primary);
+        margin: 0;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+
+    .memory-text.empty p {
+        color: var(--text-secondary);
+        font-style: italic;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .menu-icon {
+            top: 1rem;
+            right: 1rem;
+            width: 44px;
+            height: 44px;
+        }
+
+        .menu-dropdown {
+            top: 4.5rem;
+            right: 1rem;
+            min-width: 200px;
+        }
+
+        .profile-modal-content {
+            width: 95%;
+        }
+
+        .profile-modal-body {
+            padding: 1.5rem;
+        }
+    }
+</style>
+
+<script>
+    let menuDropdownOpen = false;
+    let themeSubmenuOpen = false;
+    let userProfileData = null;
+    let userMemoryData = null;
+
+    // Toggle menu dropdown
+    function toggleMenuDropdown() {
+        const dropdown = document.getElementById('menuDropdown');
+        menuDropdownOpen = !menuDropdownOpen;
+
+        if (menuDropdownOpen) {
+            dropdown.classList.add('active');
+            dropdown.style.display = 'block';
+            // Load user data when opening
+            if (!userProfileData) {
+                loadUserProfile();
+            }
+            // Update theme checkmarks
+            updateThemeCheckmarks();
+        } else {
+            dropdown.classList.remove('active');
+            // Close theme submenu when closing main menu
+            if (themeSubmenuOpen) {
+                toggleThemeSubmenu();
+            }
+            setTimeout(() => {
+                dropdown.style.display = 'none';
+            }, 300);
+        }
+    }
+
+    // Toggle theme submenu
+    function toggleThemeSubmenu() {
+        const submenu = document.getElementById('themeSubmenu');
+        themeSubmenuOpen = !themeSubmenuOpen;
+
+        if (themeSubmenuOpen) {
+            submenu.classList.add('active');
+            submenu.style.display = 'block';
+            updateThemeCheckmarks();
+        } else {
+            submenu.classList.remove('active');
+            setTimeout(() => {
+                submenu.style.display = 'none';
+            }, 300);
+        }
+    }
+
+    // Set theme
+    function setTheme(theme) {
+        const body = document.body;
+
+        if (theme === 'dark') {
+            body.setAttribute('data-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            body.removeAttribute('data-theme');
+            localStorage.setItem('theme', 'light');
+        }
+
+        updateThemeCheckmarks();
+    }
+
+    // Update theme checkmarks
+    function updateThemeCheckmarks() {
+        const lightCheck = document.getElementById('lightCheck');
+        const darkCheck = document.getElementById('darkCheck');
+        const currentTheme = localStorage.getItem('theme') || 'light';
+
+        if (currentTheme === 'dark') {
+            lightCheck.style.display = 'none';
+            darkCheck.style.display = 'block';
+        } else {
+            lightCheck.style.display = 'block';
+            darkCheck.style.display = 'none';
+        }
+    }
+
+    // Open profile modal
+    function openProfile() {
+        const modal = document.getElementById('profileModal');
+        modal.classList.add('active');
+        modal.style.display = 'flex';
+
+        // Close menu dropdown
+        if (menuDropdownOpen) {
+            toggleMenuDropdown();
+        }
+
+        // Load profile data if not already loaded
+        if (!userProfileData) {
+            loadUserProfile();
+        }
+    }
+
+    // Close profile modal
+    function closeProfile() {
+        const modal = document.getElementById('profileModal');
+        modal.classList.remove('active');
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 300);
+    }
+
+    // Handle logout
+    async function handleLogout() {
+        try {
+            const response = await fetch('/api/v1/auth/logout', {
+                method: 'POST',
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                // Redirect to login page
+                window.location.href = '/';
+            } else {
+                console.error('Logout failed');
+                alert('Failed to logout. Please try again.');
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+            alert('An error occurred during logout.');
+        }
+    }
+
+    // Load user profile data
+    async function loadUserProfile() {
+        try {
+            const response = await fetch('/api/v1/auth/me', {
+                method: 'GET',
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                userProfileData = data.user;
+                userMemoryData = data.memory || null;
+                displayUserProfile(data.user);
+            } else {
+                displayDefaultProfile();
+            }
+        } catch (error) {
+            console.error('Failed to load user profile:', error);
+            displayDefaultProfile();
+        }
+    }
+
+    // Display user profile data
+    function displayUserProfile(user) {
+        const nameElement = document.getElementById('profileName');
+        const usernameElement = document.getElementById('profileUsername');
+        const emailElement = document.getElementById('profileEmail');
+        const joinedElement = document.getElementById('profileJoined');
+        const verifiedElement = document.getElementById('profileVerified');
+
+        // Set name
+        const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ');
+        nameElement.textContent = fullName || 'User';
+
+        // Set username
+        usernameElement.textContent = user.username ? `@${user.username}` : '@user';
+
+        // Set email
+        emailElement.textContent = user.email || 'email@example.com';
+
+        // Set join date
+        if (user.createdAt) {
+            const joinDate = new Date(user.createdAt);
+            const monthYear = joinDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+            joinedElement.textContent = `Joined ${monthYear}`;
+        }
+
+        // Show verified badge if email is verified
+        if (user.isEmailVerified) {
+            verifiedElement.style.display = 'flex';
+        } else {
+            verifiedElement.style.display = 'none';
+        }
+    }
+
+    // Display default profile when not authenticated
+    function displayDefaultProfile() {
+        const nameElement = document.getElementById('profileName');
+        const usernameElement = document.getElementById('profileUsername');
+        const emailElement = document.getElementById('profileEmail');
+        const joinedElement = document.getElementById('profileJoined');
+        const verifiedElement = document.getElementById('profileVerified');
+
+        nameElement.textContent = 'Guest User';
+        usernameElement.textContent = '@guest';
+        emailElement.textContent = 'Not signed in';
+        joinedElement.textContent = 'Welcome!';
+        verifiedElement.style.display = 'none';
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        const dropdown = document.getElementById('menuDropdown');
+        const icon = document.getElementById('menuIcon');
+
+        if (menuDropdownOpen && dropdown && icon) {
+            if (!dropdown.contains(e.target) && !icon.contains(e.target)) {
+                toggleMenuDropdown();
+            }
+        }
+    });
+
+    // Open memory modal
+    function openMemory() {
+        const modal = document.getElementById('memoryModal');
+        modal.classList.add('active');
+        modal.style.display = 'flex';
+
+        // Close menu dropdown
+        if (menuDropdownOpen) {
+            toggleMenuDropdown();
+        }
+
+        // Load memory data if not already loaded
+        if (!userMemoryData) {
+            loadMemoryData();
+        } else {
+            displayMemory(userMemoryData);
+        }
+    }
+
+    // Close memory modal
+    function closeMemory() {
+        const modal = document.getElementById('memoryModal');
+        modal.classList.remove('active');
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 300);
+    }
+
+    // Load memory data
+    async function loadMemoryData() {
+        try {
+            const response = await fetch('/api/v1/auth/me', {
+                method: 'GET',
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                userMemoryData = data.memory || null;
+                displayMemory(userMemoryData);
+            } else {
+                displayMemory(null);
+            }
+        } catch (error) {
+            console.error('Failed to load memory data:', error);
+            displayMemory(null);
+        }
+    }
+
+    // Display memory data
+    function displayMemory(memory) {
+        const memoryTextElement = document.getElementById('memoryText');
+
+        if (memory && memory.trim() !== '') {
+            memoryTextElement.innerHTML = `<p>${escapeHtml(memory)}</p>`;
+            memoryTextElement.classList.remove('empty');
+        } else {
+            memoryTextElement.innerHTML = '<p>No memories stored yet. Chat with Retro to build memories!</p>';
+            memoryTextElement.classList.add('empty');
+        }
+    }
+
+    // Escape HTML to prevent XSS
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Close profile modal when clicking outside
+    document.addEventListener('click', (e) => {
+        const profileModal = document.getElementById('profileModal');
+        const memoryModal = document.getElementById('memoryModal');
+        const modalContent = document.querySelector('.profile-modal-content');
+
+        if (profileModal && profileModal.classList.contains('active')) {
+            if (e.target === profileModal && !modalContent.contains(e.target)) {
+                closeProfile();
+            }
+        }
+
+        if (memoryModal && memoryModal.classList.contains('active')) {
+            if (e.target === memoryModal) {
+                closeMemory();
+            }
+        }
+    });
+
+    // Load saved theme on page load
+    function loadSavedTheme() {
+        const savedTheme = localStorage.getItem('theme');
+
+        if (savedTheme === 'dark') {
+            document.body.setAttribute('data-theme', 'dark');
+        }
+
+        updateThemeCheckmarks();
+    }
+
+    // Load profile data and theme on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        loadUserProfile();
+        loadSavedTheme();
+    });
+</script>
